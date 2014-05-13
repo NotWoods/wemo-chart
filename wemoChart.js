@@ -248,11 +248,11 @@ function loadChart(chartArray, title) {
 
   lineChartOptions.title = title;
 
-  var chart = new google.visualization.LineChart(document.getElementById('chart'));
+  var chart = new google.visualization.LineChart(document.getElementById(lineChartDivId));
   chart.draw(data, lineChartOptions);
 
   if (tableDivId != null && tableOptions != null) {
-    var table = new google.visualization.Table(document.getElementById('table'));
+    var table = new google.visualization.Table(document.getElementById(tableDivId));
     table.draw(data, tableOptions);
   }
 
