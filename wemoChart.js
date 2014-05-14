@@ -47,6 +47,17 @@ var lineChartOptions = {
     title: 'Power Consumed for past 30 mins (kWh)',
     titleTextStyle: {
       italic: false
+    },
+    viewWindow: {
+      max: 0.2,
+      min: 0
+    }
+  },
+  series: {
+    0: { 
+      color: '#000000',
+      lineWidth: 5,
+      lineDashStyle: [4,1]
     }
   },
   legend: { position: 'bottom' }
@@ -220,6 +231,12 @@ function formatTable() {
     }
   }
 
+  //Insert the average line
+  formattedChart.full[0].splice(1, 0, "Average");
+  for (var k = 0; k < formattedChart.average.length; k++) {
+    formattedChart.full[k+1].splice(1, 0, formattedChart.average[k][1]);
+  }
+
   loadChart(formattedChart.full, title); 
 }
 
@@ -237,12 +254,13 @@ function csvParse(string) {
 function loadChart(chartArray, title) {
   var data = new google.visualization.DataTable();
   data.addColumn('string', 'Time');
-  for (var i = 1; i < chartArray[0].length; i++) {
+  data.addColumn('number', 'Average');
+  for (var i = 2; i < chartArray[0].length; i++) {
     var dateString;
     dateString = chartArray[0][i].getMonth()+1 + '/' + chartArray[0][i].getDate() + '/' + chartArray[0][i].getFullYear() + ' Power';
     data.addColumn('number', dateString);
   }
-  for (var i = 1; i < chartArray.length; i++) {
+  for (var i = 2; i < chartArray.length; i++) {
     data.addRow(chartArray[i]);
   }
 
@@ -256,14 +274,20 @@ function loadChart(chartArray, title) {
     table.draw(data, tableOptions);
   }
 
+  /* Uncomment this code if you have three checkboxes on your website to set.
+     This code will filter the chart to only show weekdays, only show work hours,
+     or only show the average line.
+
   var weekBox = document.getElementById("week");
   var hourBox = document.getElementById("hour");
+  var averageBox = document.getElementById("average");
   weekBox.addEventListener('change', changeView, false);
   hourBox.addEventListener('change', changeView, false);
+  averageBox.addEventListener('change', changeView, false);
 
-  var allColumnIndexs = [0];
-  var weekday = [0];
-  for (var i = 1; i < chartArray[0].length; i++) {
+  var allColumnIndexs = [0,1];
+  var weekday = [0, 1];
+  for (var i = 2; i < chartArray[0].length; i++) {
     if (chartArray[0][i].getDay() != 0 && chartArray[0][i].getDay() != 6) {
       weekday.push(i);
     }
@@ -272,21 +296,25 @@ function loadChart(chartArray, title) {
   function changeView()
   {
     var view = new google.visualization.DataView(data);
-    if (weekBox.checked && hourBox.checked) {
-      view.setRows(18, 34);
+
+    if (averageBox.checked) {
+      view.setColumns([0, 1]);
+    } else if (weekBox.checked) {
       view.setColumns(weekday);
-    } else if (weekBox.checked && !hourBox.checked) {
-      view.setRows(0, 47);
-      view.setColumns(weekday);
-    } else if (!weekBox.checked && hourBox.checked) {
-      view.setRows(18, 34);
-      view.setColumns(allColumnIndexs);
     } else {
-      view.setRows(0, 47);
       view.setColumns(allColumnIndexs);
+    }
+
+    if (hourBox.checked) {
+      view.setRows(17, 31);
+    } else {
+      view.setRows(0, 46);
     }
     chart.draw(view, options);
   }
+
+  changeView();
+  */
 }
 
 request('microwave.csv', 'White Microwave');
